@@ -23,3 +23,12 @@ if __name__ == "__main__":
 
     print "Device %s: %s" % (device.hostname,
                              device.execute("echo Hello World")[0].strip())
+
+    print "Device %s: Network device list: %s" % (device.hostname,
+                                                  device.network_interfaces())
+
+    for interface in device.network_interfaces():
+        if device.network_interface_state(interface):
+            print "Device %s: %s up" % (device.hostname, interface)
+        else:
+            print "Device %s: %s down" % (device.hostname, interface)

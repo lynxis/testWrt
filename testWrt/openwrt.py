@@ -106,6 +106,22 @@ class SSHOpenWrt(OpenWrt):
         stdin, stdout, stderr = self._ssh.exec_command(command)
         return stdout.readlines()
 
+    def network_interfaces(self):
+        try:
+            devs = [x.strip() for x in self.execute("ls /sys/class/net/")]
+        except:
+            devs = ""
+        return devs
+
+    def network_interface_state(self, interface):
+        try:
+            ret = self.execute("cat /sys/class/net/%s/carrier" % interface)
+            if "1" in ret[0]:
+                return True
+            return False
+        except:
+            return False
+
 
 class RPCDOpenWrt(OpenWrt):
 
