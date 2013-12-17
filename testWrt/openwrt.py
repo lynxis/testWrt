@@ -108,6 +108,7 @@ class SSHOpenWrt(OpenWrt):
 
     def network_interfaces(self):
         try:
+            # TODO: use ubus commands here
             devs = [x.strip() for x in self.execute("ls /sys/class/net/")]
         except:
             devs = ""
@@ -115,6 +116,7 @@ class SSHOpenWrt(OpenWrt):
 
     def network_interface_state(self, interface):
         try:
+            # TODO: use ubus commands here
             ret = self.execute("cat /sys/class/net/%s/carrier" % interface)
             if "1" in ret[0]:
                 return True
