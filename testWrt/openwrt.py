@@ -4,6 +4,7 @@ import paramiko
 import socket
 
 from paramiko.util import retry_on_signal
+from scapy.all import *
 
 
 class OpenWrt(object):
@@ -35,7 +36,7 @@ class OpenWrt(object):
 
 class SSHOpenWrt(OpenWrt):
 
-    def __init__(self, hostname="192.168.1.1", password="admin",
+    def __init__(self, hostname="192.168.1.1", password=None,
                  keyfile=None, port=22, user="root", **kwargs):
         super(SSHOpenWrt, self).__init__(**kwargs)
 
@@ -50,14 +51,15 @@ class SSHOpenWrt(OpenWrt):
 
     def _ssh_socket(self, interface=None):
         for (family, stype, _, _, sockaddr) in socket.getaddrinfo(
-                self.hostname, 22, socket.AF_UNSPEC, socket.SOCK_STREAM):
+                self.hostname, self.port, socket.AF_UNSPEC,
+                socket.SOCK_STREAM):
             if stype == socket.SOCK_STREAM:
                 af = family
                 addr = sockaddr
                 break
         else:
             af, _, _, _, addr = socket.getaddrinfo(
-                self.hostname, 22, socket.AF_UNSPEC, socket.SOCK_STREAM)
+                self.hostname, self.port, socket.AF_UNSPEC, socket.SOCK_STREAM)
         sock = socket.socket(af, socket.SOCK_STREAM)
         if interface is not None:
             sock.setsockopt(socket.SOL_SOCKET, 25, interface + '\0')
@@ -71,13 +73,37 @@ class SSHOpenWrt(OpenWrt):
             private_key = paramiko.RSAKey.from_private_key_file(self.keyfile)
         self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        self._ssh.connect(self.hostname, username=self.user,
-                          password=self.password, pkey=private_key,
-                          allow_agent=True, sock=self._ssh_socket())
+        ret = self._ssh.connect(self.hostname, username=self.user,
+                                password=self.password, pkey=private_key,
+                                allow_agent=True, sock=None)
         self._ssh.load_system_host_keys()
+        return ret
 
-    def execute(self, callstr):
-        self._ssh.exec_command(callstr)
+    def portscan(self, port):
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(3)
+            result = sock.connect_ex((self.hostname, port))
+            if result == 0:
+                ret = True
+            else:
+                ret = False
+        except:
+            ret = False
+        sock.close()
+        return ret
+
+    def ping(self, count=1, wait=2):
+        from subprocess import call
+        ret = call(["ping", "-c%s" % count, "-w%s" % wait, self.hostname])
+        if ret == 0:
+            return True
+        else:
+            return False
+
+    def execute(self, command):
+        stdin, stdout, stderr = self._ssh.exec_command(command)
+        return stdout.readlines()
 
 
 class RPCDOpenWrt(OpenWrt):
