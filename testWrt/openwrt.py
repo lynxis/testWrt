@@ -4,7 +4,6 @@ import paramiko
 import socket
 
 from paramiko.util import retry_on_signal
-from scapy.all import *
 
 
 class OpenWrt(object):
