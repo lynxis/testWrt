@@ -4,8 +4,9 @@ import paramiko
 import socket
 
 from paramiko.util import retry_on_signal
+from subprocess import call
 
-SOCKET_TIMEOUT=10
+SOCKET_TIMEOUT = 10
 
 
 class OpenWrt(object):
@@ -95,7 +96,6 @@ class SSHOpenWrt(OpenWrt):
         return ret
 
     def ping(self, count=1, wait=2):
-        from subprocess import call
         ret = call(["ping", "-c%s" % count, "-w%s" % wait, self.hostname])
         if ret == 0:
             return True
