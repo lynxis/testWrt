@@ -5,6 +5,8 @@ import socket
 
 from paramiko.util import retry_on_signal
 
+SOCKET_TIMEOUT=10
+
 
 class OpenWrt(object):
 
@@ -62,7 +64,7 @@ class SSHOpenWrt(OpenWrt):
         sock = socket.socket(af, socket.SOCK_STREAM)
         if interface is not None:
             sock.setsockopt(socket.SOL_SOCKET, 25, interface + '\0')
-        sock.settimeout(10)
+        sock.settimeout(SOCKET_TIMEOUT)
         retry_on_signal(lambda: sock.connect(addr))
         return sock
 
@@ -81,7 +83,7 @@ class SSHOpenWrt(OpenWrt):
     def portscan(self, port):
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(3)
+            sock.settimeout(SOCKET_TIMEOUT)
             result = sock.connect_ex((self.hostname, port))
             if result == 0:
                 ret = True
