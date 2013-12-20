@@ -84,6 +84,12 @@ class SSHOpenWrt(OpenWrt):
     def device_hostname(self):
         return self.cat("/proc/sys/kernel/hostname")[0].strip()
 
+    def ls(self, path):
+        return [x.strip() for x in self.execute("ls %s" % path)]
+
+    def find(self, path):
+        return [x.strip() for x in self.execute("find %s" % path)]
+
     def _ssh_socket(self, interface=None):
         for (family, stype, _, _, sockaddr) in socket.getaddrinfo(
                 self.hostname, self.port, socket.AF_UNSPEC,

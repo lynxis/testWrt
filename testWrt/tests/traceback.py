@@ -31,3 +31,11 @@ if __name__ == "__main__":
     device.log_file("/etc/openwrt_version")
     device.log_ubus_call("system", "info")
     device.log_ubus_call("system", "board")
+    
+    for file in device.find("/sys/kernel/debug/usb/"):
+        device.log_file(file)
+    for file in device.find("/sys/bus/usb/"):
+        device.log_file(file)
+    for file in device.find("/sys/devices/platform/ehci-platform/"):
+        device.log_file(file)
+
