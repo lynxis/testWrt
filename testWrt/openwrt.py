@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
+import json
 import paramiko
+import re
 import socket
 
+from pprint import pformat
 from paramiko.util import retry_on_signal
 from subprocess import call
+
 
 SOCKET_TIMEOUT = 10
 
@@ -42,6 +46,7 @@ class SSHOpenWrt(OpenWrt):
                  keyfile=None, port=22, user="root", **kwargs):
         super(SSHOpenWrt, self).__init__(**kwargs)
 
+        self.ip = hostname
         self.hostname = hostname
         self.port = port
         self.keyfile = keyfile
@@ -50,6 +55,34 @@ class SSHOpenWrt(OpenWrt):
 
         self._ssh = paramiko.SSHClient()
         self.connect()
+
+    def cat(self, filename):
+        return self.execute("cat %s" % filename)
+
+    def log_file(self, filename):
+        self.log_array(filename, self.cat(filename))
+
+    def log_ubus_call(self, namespace, method):
+        return self.log_json("ubus/%s/%s" % (namespace, method),
+                             self.ubus_call(namespace, method))
+
+    def ubus_call(self, namespace, method):
+        out = self.ubus_cmd("call %s %s" % (namespace, method))
+        return json.loads(''.join(out))
+
+    def ubus_cmd(self, command):
+        return self.execute("ubus %s" % command)
+
+    def log_array(self, caller, array):
+        for line in array:
+            self.log("%s: %s" % (caller, line.strip('\n')))
+
+    def log_json(self, caller, json):
+        out = re.sub(r'u\'([^\']*)\'', r' "\1"', pformat(json)).split('\n')
+        self.log_array(caller, out)
+
+    def device_hostname(self):
+        return self.cat("/proc/sys/kernel/hostname")[0].strip()
 
     def _ssh_socket(self, interface=None):
         for (family, stype, _, _, sockaddr) in socket.getaddrinfo(
@@ -96,7 +129,9 @@ class SSHOpenWrt(OpenWrt):
         return ret
 
     def ping(self, count=1, wait=2):
-        ret = call(["ping", "-c%s" % count, "-w%s" % wait, self.hostname])
+        fh = open("NUL", "w")  # output catcher
+        ret = call(["ping", "-c%s" % count, "-w%s" %
+                   wait, self.ip], stdout=fh, stderr=fh)
         if ret == 0:
             return True
         else:
@@ -123,6 +158,28 @@ class SSHOpenWrt(OpenWrt):
             return False
         except:
             return False
+
+    def log(self, msg):
+        print "[%s] %s" % (self.hostname, msg)
+
+    def ubus(self, command):
+        try:
+            ptrn = re.compile("'(.*)' (@.*)")
+            ptrn2 = re.compile("\t\"(.*)\": { (.*) }")
+            namespaces = self.execute("ubus list -v")
+            for ns in namespaces:
+                m = ptrn.match(ns)
+                m2 = ptrn2.match(ns)
+                if m:
+                    print "Namespace: %s" % m.group(1)
+                else:
+                    if m2:
+                        param = [x.strip('"') for x in m2.group(2).split(",")]
+                        print "Method: %s(%s)" % (m2.group(1), param)
+                    else:
+                        print "Unknown: %s" % ns
+        except Exception, err:
+            print "Error %s" % err
 
 
 class RPCDOpenWrt(OpenWrt):

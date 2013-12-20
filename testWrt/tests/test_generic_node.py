@@ -32,3 +32,5 @@ if __name__ == "__main__":
             print "Device %s: %s up" % (device.hostname, interface)
         else:
             print "Device %s: %s down" % (device.hostname, interface)
+
+    device.ubus("123")
