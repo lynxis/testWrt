@@ -11,6 +11,7 @@ from subprocess import call
 
 
 SOCKET_TIMEOUT = 10
+GPIO_PATH = "/sys/class/gpio/"
 
 
 class OpenWrt(object):
@@ -57,7 +58,7 @@ class SSHOpenWrt(OpenWrt):
         self.connect()
 
     def cat(self, filename):
-        return self.execute("cat %s" % filename)
+        return [x.strip() for x in self.execute("cat %s" % filename)]
 
     def log_file(self, filename):
         self.log_array(filename, self.cat(filename))
@@ -186,6 +187,50 @@ class SSHOpenWrt(OpenWrt):
                         print "Unknown: %s" % ns
         except Exception, err:
             print "Error %s" % err
+
+    def basename(self, path):
+        return self.execute("basename %s" % path)[0].strip()
+
+    def gpio_count(self):
+        GPIOCHIP_WILDCARD = "%s/gpiochip* -d" % GPIO_PATH
+        ret = {}
+
+        gpio_chips = self.ls(GPIOCHIP_WILDCARD)
+
+        for chip in gpio_chips:
+            ret[self.basename(chip)] = int(self.cat("%s/ngpio" % chip)[0])
+
+        return ret
+
+    def gpio_export(self, gpio):
+        return self.execute("echo %s > %s/export" % (gpio, GPIO_PATH))
+
+    def gpio_unexport(self, gpio):
+        return self.execute("echo %s > %s/unexport" % (gpio, GPIO_PATH))
+
+    def gpio_inspect(self, gpio):
+        ret = {}
+
+        gpio_path = "%s/gpio%i" % (GPIO_PATH, gpio)
+        if len(self.ls("%s -d" % gpio_path)) == 0:
+            return {'exists': False}
+        else:
+            ret["exists"] = True
+
+        ret["active_low"] = self.cat("%s/active_low" % gpio_path)[0]
+        ret["direction"] = self.cat("%s/direction" % gpio_path)[0]
+        ret["value"] = self.cat("%s/value" % gpio_path)[0]
+        return ret
+
+    def gpio_inspect_all(self):
+        ret = {}
+        for chip, ngpio in self.gpio_count().iteritems():
+            ret[chip] = {}
+            for gpio in xrange(0, int(ngpio)):
+                self.gpio_export(gpio)
+                ret[chip]["gpio%i" % gpio] = self.gpio_inspect(gpio)
+                self.gpio_unexport(gpio)
+        return ret
 
 
 class RPCDOpenWrt(OpenWrt):
