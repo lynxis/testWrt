@@ -146,7 +146,7 @@ class SSHOpenWrt(OpenWrt):
 
     def execute(self, command):
         stdin, stdout, stderr = self._ssh.exec_command(command)
-        return stdout.readlines()
+        return [x.strip for x in stdout.readlines()]
 
     def network_interfaces(self):
         try:
@@ -231,6 +231,12 @@ class SSHOpenWrt(OpenWrt):
                 ret[chip]["gpio%i" % gpio] = self.gpio_inspect(gpio)
                 self.gpio_unexport(gpio)
         return ret
+
+    def dmesg(self):
+        self.execute("dmesg")
+
+    def logread(self, *args):
+        self.execute("logread %s" % ' '.join(args))
 
 
 class RPCDOpenWrt(OpenWrt):
