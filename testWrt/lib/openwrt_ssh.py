@@ -8,9 +8,17 @@ import socket
 SOCKET_TIMEOUT = 10
 
 
-class SSHOpenWrt(OpenWrtBase):
+class SSHOpenWrt(openwrt_base.OpenWrtBase):
+    """
+    Connects to the device using the paramiko ssh library
+    """
+
     def __init__(self, hostname="192.168.1.1", password=None,
                  keyfile=None, port=22, user="root", **kwargs):
+        """
+        Initializes the OpenWrt Object and estasblishes a
+        SSH Connection for command line execution
+        """
         super(SSHOpenWrt, self).__init__(**kwargs)
 
         self.ip = hostname
@@ -23,6 +31,11 @@ class SSHOpenWrt(OpenWrtBase):
         self.connect()
 
     def _ssh_socket(self, interface=None):
+        """
+        Returns a socket object for the ssh connection to the node.
+        It is necessary for forcing paramiko to use a specific interface
+        rather than just an ip address for binding the socket.
+        """
         for (family, stype, _, _, sockaddr) in socket.getaddrinfo(
                 self.ip, self.port, socket.AF_UNSPEC,
                 socket.SOCK_STREAM):
@@ -41,6 +54,10 @@ class SSHOpenWrt(OpenWrtBase):
         return sock
 
     def connect(self):
+        """
+        Establishes the paramiko connection using a keyfile or a
+        username and password.
+        """
         private_key = None
         if self.keyfile is not None:
             private_key = paramiko.RSAKey.from_private_key_file(self.keyfile)
@@ -53,9 +70,15 @@ class SSHOpenWrt(OpenWrtBase):
         return ret
 
     def _strip_array(self, array):
+        """
+        Helper function to remove unwanted spaces and linefeeds
+        """
         return [x.strip() for x in array]
 
     def execute(self, command):
+        """
+        Implements the execute method over a SSH Connection
+        """
         stdin, stdout, stderr = self._ssh.exec_command(command)
         return [self._strip_array(stdout.readlines()),
                 self._strip_array(stderr.readlines())]
