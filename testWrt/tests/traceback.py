@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from testWrt import testsetup
-from testWrt.openwrt import SSHOpenWrt
+
+from testWrt.lib.openwrt_ssh import SSHOpenWrt
 
 KEYFILE = "/home/robin/Documents/42reports/firmware-tools/build/id_42r"
-
 
 
 if __name__ == "__main__":
@@ -23,14 +23,14 @@ if __name__ == "__main__":
         device.log("sshd not running")
         exit(1)
 
-    host = device.device_hostname()
-    device.log("hostname: %s" % host)
-    device.hostname = host
+    device.log("hostname: %s" % device._hostname)
 
     device.log_file("/etc/openwrt_release")
     device.log_file("/etc/openwrt_version")
-    device.log_ubus_call("system", "info")
-    device.log_ubus_call("system", "board")
-    
+    device.log_json("ubus.system.info",
+                    device.ubus_call("system", "info"))
+    device.log_json("ubus.system.board",
+                    device.ubus_call("system", "board"))
+
     device.log_array("logread", device.logread())
     device.log_array("dmesg", device.dmesg())

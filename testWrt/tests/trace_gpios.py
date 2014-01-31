@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from testWrt import testsetup
-from testWrt.openwrt import SSHOpenWrt
+from testWrt.lib.openwrt_ssh import SSHOpenWrt
 
 KEYFILE = "/home/robin/Documents/42reports/firmware-tools/build/id_42r"
 
@@ -22,10 +22,6 @@ if __name__ == "__main__":
     else:
         device.lg("sshd not running")
         exit(1)
-
-    host = device.device_hostname()
-    device.log("hostname: %s" % host)
-    device.hostname = host
 
     device.log_json("gpio_count", device.gpio_count())
     device.log_json("gpio_inspect", device.gpio_inspect_all())
