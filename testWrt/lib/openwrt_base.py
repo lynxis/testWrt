@@ -1,3 +1,4 @@
+import os
 from subprocess import call  # ping()
 import socket  # portscan()
 SOCKET_TIMEOUT = 10
@@ -54,7 +55,7 @@ class OpenWrtBase(object):
         return stdout
 
     def ping(self, count=1, wait=2):
-        fh = open("NUL", "w")  # output catcher
+        fh = open(os.devnull, "w")  # output catcher
         ret = call(["ping", "-c%s" % count, "-w%s" %
                    wait, self.ip], stdout=fh, stderr=fh)
         if ret == 0:
