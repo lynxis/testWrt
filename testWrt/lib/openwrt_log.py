@@ -1,5 +1,6 @@
 from pprint import pformat
 import re
+from testWrt.utils.syslog_receiver import SyslogServer
 
 
 class OpenWrtLog(object):
@@ -19,3 +20,9 @@ class OpenWrtLog(object):
         if self._hostname is None:
             self._hostname = self.hostname()
         print ("[%s] %s" % (self._hostname, msg))
+
+    def spawn_logserver(self, hostname, port):
+        server = SyslogServer(hostname, port)
+        server.spawn()
+        self.execute_background("logread -f -r %s %s -u" % (hostname, port))
+        return server

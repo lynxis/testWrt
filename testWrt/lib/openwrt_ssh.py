@@ -82,3 +82,8 @@ class SSHOpenWrt(openwrt_base.OpenWrtBase):
         stdin, stdout, stderr = self._ssh.exec_command(command)
         return [self._strip_array(stdout.readlines()),
                 self._strip_array(stderr.readlines())]
+
+    def execute_background(self, command):
+        chan = self._ssh._transport.open_session()
+        from thread import start_new_thread
+        start_new_thread(chan.exec_command, (command,))
