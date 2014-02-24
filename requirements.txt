@@ -1,0 +1,1 @@
+git+git://github.com/scottkmaxwell/paramiko.git@ae078f51d622931954e47e78029a889c4e721a05
