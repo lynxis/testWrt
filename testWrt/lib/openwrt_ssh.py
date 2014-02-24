@@ -1,4 +1,5 @@
-import openwrt_base
+
+from .openwrt_base import OpenWrtBase
 
 import paramiko
 from paramiko.util import retry_on_signal
@@ -7,8 +8,7 @@ import socket
 SOCKET_TIMEOUT = 10
 
 
-class SSHOpenWrt(openwrt_base.OpenWrtBase):
-
+class SSHOpenWrt(OpenWrtBase):
     def __init__(self, hostname="192.168.1.1", password=None,
                  keyfile=None, port=22, user="root", **kwargs):
         super(SSHOpenWrt, self).__init__(**kwargs)
@@ -48,7 +48,7 @@ class SSHOpenWrt(openwrt_base.OpenWrtBase):
 
         ret = self._ssh.connect(self.ip, username=self.user,
                                 password=self.password, pkey=private_key,
-                                allow_agent=True, sock=None)
+                                allow_agent=True, look_for_keys=False, sock=None)
         self._ssh.load_system_host_keys()
         return ret
 

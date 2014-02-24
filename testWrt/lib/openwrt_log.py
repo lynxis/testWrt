@@ -18,4 +18,4 @@ class OpenWrtLog(object):
     def log(self, msg):
         if self._hostname is None:
             self._hostname = self.hostname()
-        print "[%s] %s" % (self._hostname, msg)
+        print ("[%s] %s" % (self._hostname, msg))
