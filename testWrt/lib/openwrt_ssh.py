@@ -8,7 +8,7 @@ import socket
 SOCKET_TIMEOUT = 10
 
 
-class SSHOpenWrt(openwrt_base.OpenWrtBase):
+class SSHOpenWrt(OpenWrtBase):
     """
     Connects to the device using the paramiko ssh library
     """
