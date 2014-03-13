@@ -1,7 +1,7 @@
 import time
-import SocketServer
-from Queue import Queue
-from thread import start_new_thread
+import socketserver
+from queue import Queue
+from _thread import start_new_thread
 
 
 class SyslogServer():
@@ -20,7 +20,7 @@ class SyslogServer():
 
     def start(self, *arg):
         try:
-            server = SocketServer.UDPServer(
+            server = socketserver.UDPServer(
                 (self.hostname, self.port), self.handler())
             server.serve_forever(poll_interval=0.5)
         except (IOError, SystemExit):
@@ -29,7 +29,7 @@ class SyslogServer():
     def handler(self):
         parent = self
 
-        class SyslogHandler(SocketServer.BaseRequestHandler):
+        class SyslogHandler(socketserver.BaseRequestHandler):
 
             def handle(self):
                 data = bytes.decode(self.request[0].strip())
