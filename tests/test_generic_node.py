@@ -17,7 +17,7 @@ if __name__ == "__main__":
     else:
         device.log("SSH not running")
 
-    stdout, stderr = device.execute("echo Hello World")
+    stdout, stderr = device.execute_one_shot("echo Hello World")
     if (stdout) > 0:
         device.log("Command execution working")
     else:

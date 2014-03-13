@@ -9,5 +9,5 @@ class TestSSHOpenWrt(object):
     def test_connect(self):
         ts = testsetup.create_generic()
         device = SSHOpenWrt(hostname="192.168.1.1")
-        stdout, stderr = device.execute("echo hello openwrt")
+        stdout, stderr = device.execute_one_shot("echo hello openwrt")
         assert(stdout[0].strip() == "hello openwrt")

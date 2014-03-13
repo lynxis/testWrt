@@ -75,13 +75,26 @@ class SSHOpenWrt(OpenWrtBase):
         """
         return [x.strip() for x in array]
 
+    def execute_one_shot(self, command):
+        """
+        Implements the execute method over a SSH Connection
+        Without any return value
+
+        @param command with arguments
+        @type str
+        @rtype list
+        """
+        stdin, stdout, stderr = self._ssh.exec_command(command)
+        stdin.close()
+        return [self._strip_array(stdout.readlines()),
+                self._strip_array(stderr.readlines())]
+
     def execute(self, command):
         """
         Implements the execute method over a SSH Connection
         """
-        stdin, stdout, stderr = self._ssh.exec_command(command)
-        return [self._strip_array(stdout.readlines()),
-                self._strip_array(stderr.readlines())]
+        return self._ssh.exec_command(command)
+
 
     def execute_background(self, command):
         chan = self._ssh._transport.open_session()

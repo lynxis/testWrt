@@ -18,6 +18,10 @@ class OpenWrtBase(object):
         self.rootfs = rootfs
 
     def execute(self, callstr):
+        """ call @arg callstr. return a list of [stdin, stdout, stderr] """
+        raise NotImplementedError()
+
+    def execute_one_shot(self, callstr):
         """ call @arg callstr. return a list of [stdout, stderr] """
         raise NotImplementedError()
 

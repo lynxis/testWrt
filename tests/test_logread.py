@@ -25,7 +25,7 @@ if __name__ == "__main__":
     msg_seen = False
 
     while not msg_seen:
-        device.execute("logger %s" % msg)
+        device.execute_one_shot("logger %s" % msg)
         if msg in syslog.read():
             msg_seen = True
 
