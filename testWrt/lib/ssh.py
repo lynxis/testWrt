@@ -1,5 +1,5 @@
 
-from .openwrt_base import OpenWrtBase
+from .base import OpenWrtBase
 
 import paramiko
 from paramiko.util import retry_on_signal

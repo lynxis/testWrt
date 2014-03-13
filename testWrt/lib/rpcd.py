@@ -1,4 +1,4 @@
-from openwrt_generic import OpenWrtBase
+from .base import OpenWrtBase
 
 class RPCDOpenWrt(OpenWrtBase):
 

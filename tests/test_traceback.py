@@ -2,7 +2,7 @@
 
 from testWrt import testsetup
 
-from testWrt.lib.openwrt_ssh import SSHOpenWrt
+from testWrt.lib import SSHOpenWrt
 
 KEYFILE = "/home/robin/Documents/42reports/firmware-tools/build/id_42r"
 
