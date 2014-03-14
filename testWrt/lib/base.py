@@ -1,8 +1,10 @@
 import os
 from subprocess import call  # ping()
 import socket  # portscan()
-SOCKET_TIMEOUT = 10
 
+from .uci import Uci
+
+SOCKET_TIMEOUT = 10
 
 class OpenWrtBase(object):
 
@@ -33,7 +35,7 @@ class OpenWrtBase(object):
         """ 
         return @arg filename as array of lines
         """
-        stdout, stderr = self.execute("cat %s" % filename)
+        stdout, stderr = self.execute_one_shot("cat %s" % filename)
         return stdout
 
     def find(self, path):
@@ -83,7 +85,17 @@ class OpenWrtBase(object):
 
     def uci_load(self, ucistr):
         """ load a uci config same a `cat | uci import` """
-        self.execute("echo " + ucistr + " | uci import -")
+        self.execute("echo " + ucistr + " | uci import ")
+
+    def uci_merge(self, uci):
+        """ merge uci into system configuration """
+        if not isinstance(uci, Uci):
+            raise RuntimeError("Uci is not an instance of Uci - use new module uci")
+        # -m means merge
+        for package, content in uci.packages.items():
+            stdin, stdout, stderr = self.execute("uci -m import %s" % package)
+        stdin.write("".join([config.export() for config in content]))
+        stdin.channel.shutdown(2)
 
     def uci(self, param):
         """ set / get add list - see `uci --help` for param.
@@ -91,4 +103,4 @@ class OpenWrtBase(object):
         """
         # TODO: replace this with library calls?
         # TODO: replace this with ubus calls?
-        self.execute(self, "uci " + param)
+        return self.execute("uci " + param)
