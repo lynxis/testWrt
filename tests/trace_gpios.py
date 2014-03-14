@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 
 from testWrt import testsetup
-from testWrt.lib.openwrt_ssh import SSHOpenWrt
-
-KEYFILE = "/home/robin/Documents/42reports/firmware-tools/build/id_42r"
-
-
+from testWrt.lib import SSHOpenWrt
 
 if __name__ == "__main__":
     ts = testsetup.create_generic()
