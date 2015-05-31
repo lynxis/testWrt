@@ -39,9 +39,9 @@ class TestOpenWrt(object):
         assert_stderrlines(streams)
 
     def test_uci_set(self):
-        streams = self.owrt.execute_one_shot('uci set tests.uciadd.testoption=foo')
+        streams = self.owrt.execute_one_shot('uci set tests.@uciadd[-1].testoption=foo')
         assert_stderrlines(streams)
 
     def test_uci_get(self):
-        streams = self.owrt.execute_one_shot('uci get tests.uciadd')
+        streams = self.owrt.execute_one_shot('uci get tests.@uciadd[-1]')
         assert_stderrlines(streams)
